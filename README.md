@@ -10,10 +10,7 @@ calling `inject_library_file_sync()`. In our example we named it
 data, which you can use for application-specific purposes.
 
 Note that only the build system is iOS-specific, so this example is
-easily portable to all other OSes supported by Frida. Also note that the
-injector is quite large due to it containing a frida-helper binary with
-proper entitlements. It is possible to link this in and shave off some
-footprint, but for this example we'd rather keep things simple.
+easily portable to all other OSes supported by Frida.
 
 # Prerequisites
 
