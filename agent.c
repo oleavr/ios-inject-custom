@@ -11,9 +11,9 @@ example_agent_main (const gchar * data, gboolean * stay_resident)
   /* We don't want to our library to be unloaded after we return. */
   *stay_resident = TRUE;
 
-  g_printerr ("example_agent_main()\n");
-
   gum_init_embedded ();
+
+  g_printerr ("example_agent_main()\n");
 
   interceptor = gum_interceptor_obtain ();
 
