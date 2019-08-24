@@ -7,7 +7,7 @@ LDFLAGS := -Wl,-dead_strip
 STRIP := $(shell xcrun --sdk iphoneos -f strip) -Sx
 CODESIGN := $(shell xcrun --sdk iphoneos -f codesign) -f -s "iPhone Developer"
 
-frida_version := 12.6.16
+frida_version := 12.6.17
 frida_os_arch := ios-$(host_arch)
 frida_core_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-core-devkit-$(frida_version)-$(frida_os_arch).tar.xz
 frida_gum_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-gum-devkit-$(frida_version)-$(frida_os_arch).tar.xz

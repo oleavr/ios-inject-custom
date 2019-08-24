@@ -20,15 +20,14 @@ example_agent_main (const gchar * data, gboolean * stay_resident)
   /* Transactions are optional but improve performance with multiple hooks. */
   gum_interceptor_begin_transaction (interceptor);
 
-  gum_interceptor_replace_function (interceptor,
+  gum_interceptor_replace (interceptor,
       (gpointer) gum_module_find_export_by_name (NULL, "open"), replacement_open, NULL);
   /*
    * ^
    * |
-   * This is using replace_function(), but there's also attach_listener() which
-   * can be used to hook functions without any knowledge of argument types,
-   * calling convention, etc. It can even be used to put a probe in the middle
-   * of a function.
+   * This is using replace(), but there's also attach() which can be used to hook
+   * functions without any knowledge of argument types, calling convention, etc.
+   * It can even be used to put a probe in the middle of a function.
    */
 
   gum_interceptor_end_transaction (interceptor);
