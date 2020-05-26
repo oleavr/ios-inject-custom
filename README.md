@@ -27,7 +27,7 @@ This will build the injector, the payload, and an example program you
 can inject the payload into to easily observe the results.
 
 Next copy the `bin/` directory onto your iOS device someplace outside the
-sandbox, e.g. `/usr/local/ios-inject-custom/`. (Technically only the `inject`
+sandbox, e.g. `/usr/local/ios-inject-example/`. (Technically only the `inject`
 binary needs to be located outside the sandbox.)
 
 In one terminal SSH to your device and launch the `victim` binary:

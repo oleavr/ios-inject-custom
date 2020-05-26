@@ -15,8 +15,8 @@ frida_gum_devkit_url := https://github.com/frida/frida/releases/download/$(frida
 all: bin/inject bin/agent.dylib bin/victim
 
 deploy: bin/inject bin/agent.dylib bin/victim
-	ssh iphone "rm -rf /var/root/ios-inject-example"
-	scp -r bin iphone:/var/root/ios-inject-example
+	ssh iphone "rm -rf /usr/local/ios-inject-example"
+	scp -r bin iphone:/usr/local/ios-inject-example
 
 bin/inject: inject.c ext/frida-core/.stamp
 	@mkdir -p $(@D)
