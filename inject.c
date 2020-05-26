@@ -11,14 +11,14 @@ main (int argc, char * argv[])
   GError * error;
   guint id;
 
+  frida_init ();
+
   if (argc != 2)
     goto bad_usage;
 
   pid = atoi (argv[1]);
   if (pid <= 0)
     goto bad_usage;
-
-  frida_init ();
 
   /*
    * Note that we use Frida's injector in inprocess mode, which is why
@@ -30,7 +30,7 @@ main (int argc, char * argv[])
   injector = frida_injector_new_inprocess ();
 
   error = NULL;
-  id = frida_injector_inject_library_file_sync (injector, pid, "./agent.dylib", "example_agent_main", "example data", &error);
+  id = frida_injector_inject_library_file_sync (injector, pid, "./agent.dylib", "example_agent_main", "example data", NULL, &error);
   if (error != NULL)
   {
     fprintf (stderr, "%s\n", error->message);
@@ -39,7 +39,7 @@ main (int argc, char * argv[])
     result = 1;
   }
 
-  frida_injector_close_sync (injector);
+  frida_injector_close_sync (injector, NULL, NULL);
   g_object_unref (injector);
 
   frida_deinit ();
@@ -48,7 +48,8 @@ main (int argc, char * argv[])
 
 bad_usage:
   {
-    fprintf (stderr, "Usage: %s <pid>\n", argv[0]);
+    g_printerr ("Usage: %s <pid>\n", argv[0]);
+    frida_deinit ();
     return 1;
   }
 }

@@ -1,13 +1,13 @@
 host_arch := arm64
 host_machine := arm64
 
-CC := $(shell xcrun --sdk iphoneos -f clang) -isysroot $(shell xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=7.0 -arch $(host_machine)
+CC := $(shell xcrun --sdk iphoneos -f clang) -isysroot $(shell xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=8.0 -arch $(host_machine)
 CFLAGS := -Wall -pipe -Os
 LDFLAGS := -Wl,-dead_strip
 STRIP := $(shell xcrun --sdk iphoneos -f strip) -Sx
 CODESIGN := $(shell xcrun --sdk iphoneos -f codesign) -f -s "iPhone Developer"
 
-frida_version := 12.6.17
+frida_version := 12.9.4
 frida_os_arch := ios-$(host_arch)
 frida_core_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-core-devkit-$(frida_version)-$(frida_os_arch).tar.xz
 frida_gum_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-gum-devkit-$(frida_version)-$(frida_os_arch).tar.xz
