@@ -1,16 +1,15 @@
 host_arch := arm64
 host_machine := arm64
 
-CC := $(shell xcrun --sdk iphoneos -f clang) -isysroot $(shell xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=8.0 -arch $(host_machine)
+CC := $(shell xcrun --sdk iphoneos -f clang) -isysroot $(shell xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=8.0
 CFLAGS := -Wall -pipe -Os
 LDFLAGS := -Wl,-dead_strip
 STRIP := $(shell xcrun --sdk iphoneos -f strip) -Sx
 CODESIGN := $(shell xcrun --sdk iphoneos -f codesign) -f -s "iPhone Developer"
+LIPO := $(shell xcrun --sdk iphoneos -f lipo)
 
 frida_version := 12.9.4
 frida_os_arch := ios-$(host_arch)
-frida_core_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-core-devkit-$(frida_version)-$(frida_os_arch).tar.xz
-frida_gum_devkit_url := https://github.com/frida/frida/releases/download/$(frida_version)/frida-gum-devkit-$(frida_version)-$(frida_os_arch).tar.xz
 
 all: bin/inject bin/agent.dylib bin/victim
 
@@ -18,34 +17,47 @@ deploy: bin/inject bin/agent.dylib bin/victim
 	ssh iphone "rm -rf /usr/local/ios-inject-example"
 	scp -r bin iphone:/usr/local/ios-inject-example
 
-bin/inject: inject.c ext/frida-core/.stamp
+bin/inject: obj/arm64/inject obj/arm64e/inject
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -I./ext/frida-core inject.c -o $@ -L./ext/frida-core -lfrida-core -Wl,-framework,Foundation,-framework,UIKit -lresolv $(LDFLAGS)
+	$(LIPO) $^ -create -output $@
+
+bin/agent.dylib: obj/arm64/agent.dylib obj/arm64e/agent.dylib
+	@mkdir -p $(@D)
+	$(LIPO) $^ -create -output $@
+
+bin/victim: obj/arm64/victim obj/arm64e/victim
+	@mkdir -p $(@D)
+	$(LIPO) $^ -create -output $@
+
+obj/%/inject: inject.c obj/%/frida-core/.stamp
+	@mkdir -p $(@D)
+	$(CC) -arch $* $(CFLAGS) -I$(@D)/frida-core inject.c -o $@ -L$(@D)/frida-core -lfrida-core -Wl,-framework,Foundation,-framework,UIKit -lresolv $(LDFLAGS)
 	$(STRIP) $@
 	$(CODESIGN) --entitlements inject.xcent $@
 
-bin/agent.dylib: agent.c ext/frida-gum/.stamp
+obj/%/agent.dylib: agent.c obj/%/frida-gum/.stamp
 	@mkdir -p $(@D)
-	$(CC) -shared -Wl,-exported_symbol,_example_agent_main $(CFLAGS) -I./ext/frida-gum agent.c -o $@ -L./ext/frida-gum -lfrida-gum $(LDFLAGS)
+	$(CC) -arch $* -shared -Wl,-exported_symbol,_example_agent_main $(CFLAGS) -I$(@D)/frida-gum agent.c -o $@ -L$(@D)/frida-gum -lfrida-gum $(LDFLAGS)
 	$(STRIP) $@
 	$(CODESIGN) $@
 
-bin/victim: victim.c
+obj/%/victim: victim.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) victim.c -o $@ $(LDFLAGS)
+	$(CC) -arch $* $(CFLAGS) victim.c -o $@ $(LDFLAGS)
 	$(STRIP) $@
 	$(CODESIGN) $@
 
-ext/frida-core/.stamp:
+obj/%/frida-core/.stamp:
 	@mkdir -p $(@D)
-	@rm -f $(@D)/*
-	curl -Ls $(frida_core_devkit_url) | xz -d | tar -C $(@D) -xf -
+	@$(RM) $(@D)/*
+	curl -Ls https://github.com/frida/frida/releases/download/$(frida_version)/frida-core-devkit-$(frida_version)-ios-$*.tar.xz | xz -d | tar -C $(@D) -xf -
 	@touch $@
 
-ext/frida-gum/.stamp:
+obj/%/frida-gum/.stamp:
 	@mkdir -p $(@D)
-	@rm -f $(@D)/*
-	curl -Ls $(frida_gum_devkit_url) | xz -d | tar -C $(@D) -xf -
+	@$(RM) $(@D)/*
+	curl -Ls https://github.com/frida/frida/releases/download/$(frida_version)/frida-gum-devkit-$(frida_version)-ios-$*.tar.xz | xz -d | tar -C $(@D) -xf -
 	@touch $@
 
 .PHONY: all deploy
+.PRECIOUS: obj/%/frida-core/.stamp obj/%/frida-gum/.stamp
