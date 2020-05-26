@@ -13,6 +13,9 @@ frida_os_arch := ios-$(host_arch)
 
 all: bin/inject bin/agent.dylib bin/victim
 
+clean:
+	$(RM) -r bin/ obj/
+
 deploy: bin/inject bin/agent.dylib bin/victim
 	ssh iphone "rm -rf /usr/local/ios-inject-example"
 	scp -r bin iphone:/usr/local/ios-inject-example
@@ -59,5 +62,5 @@ obj/%/frida-gum/.stamp:
 	curl -Ls https://github.com/frida/frida/releases/download/$(frida_version)/frida-gum-devkit-$(frida_version)-ios-$*.tar.xz | xz -d | tar -C $(@D) -xf -
 	@touch $@
 
-.PHONY: all deploy
+.PHONY: all clean deploy
 .PRECIOUS: obj/%/frida-core/.stamp obj/%/frida-gum/.stamp
